@@ -2,6 +2,7 @@
 
 : "${CM_LAUNCHER=dmenu}"
 : "${CM_DIR="${XDG_RUNTIME_DIR-"${TMPDIR-/tmp}"}"}"
+: "${CM_SELECTIONS=clipboard primary}"
 
 major_version=5
 
@@ -9,6 +10,10 @@ shopt -s nullglob
 
 cache_dir=$CM_DIR/clipmenu.$major_version.$USER
 cache_file_prefix=$cache_dir/line_cache
+
+# This comes from the environment, so we rely on word splitting.
+# shellcheck disable=SC2206
+cm_selections=( $CM_SELECTIONS )
 
 if [[ $1 == --help ]] || [[ $1 == -h ]]; then
     cat << 'EOF'
@@ -21,6 +26,7 @@ Environment variables:
 
 - $CM_LAUNCHER: specify a dmenu-compatible launcher (default: dmenu)
 - $CM_DIR: specify the base directory to store the cache dir in (default: $XDG_RUNTIME_DIR, $TMPDIR, or /tmp)
+- $CM_SELECTIONS: space separated list of the selections to manage (default: "clipboard primary")
 EOF
     exit 0
 fi
@@ -67,6 +73,6 @@ if ! [[ -f "$file" ]]; then
     exit 2
 fi
 
-for selection in clipboard primary; do
+for selection in "${cm_selections[@]}"; do
     xsel --logfile /dev/null -i --"$selection" < "$file"
 done
