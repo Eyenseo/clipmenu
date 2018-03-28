@@ -41,15 +41,15 @@ get_first_line() {
     awk -v limit="$line_length_limit" '
         BEGIN { printed = 0; }
 
-        printed == 0 && NF {
-            $0 = substr($0, 0, limit);
-            printf("%s", $0);
-            printed = 1;
+        printed < limit && NF {
+            $0 = substr($0, 0, limit - printed);
+            printf("%s ", $0);
+            printed = printed + length($0);
         }
 
         END {
             if (NR > 1) {
-                print " (" NR " lines)";
+                print "(" NR " lines)";
             } else {
                 printf("\n");
             }
